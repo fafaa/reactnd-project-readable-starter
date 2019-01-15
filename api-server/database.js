@@ -22,6 +22,7 @@ class DB {
                 userStats.performance += data.time_score;
             }
             userStats.overall = 2 * userStats.engagement + 3 * userStats.performance;
+            // let userStats = this.setStats(articlesByAuthor[user]);
             usersSumStats.push(userStats);
             if(user === queryParams.user) {
                 resp.me = userStats;
@@ -125,20 +126,22 @@ class DB {
         return values.sort((a, b) => {return b[property] - a[property]})
             .map(i => ({ score: i[property], author: i.author}))
     }
-
-    setStats(dataSource ) {
-        //dataSource = articlesByAuthor[user]
-        let stats = {
-            engagement: 0,
-            performance: 0,
-            overall: 0
-        }
-        for(let data of articlesByAuthor[user]) {
-            stats.engagement += Object.values(data.params).reduce(((x,y) => x+y), 0);
-            stats.performance += data.time_score;
-        }
-        stats.overall = 2 * userStats.engagement + 3 * userStats.performance;
-    }
+    //
+    // setStats(dataSource ) {
+    //     console.log(dataSource)
+    //     //dataSource = articlesByAuthor[user]
+    //     let stats = {
+    //         engagement: 0,
+    //         performance: 0,
+    //         overall: 0
+    //     }
+    //     for(let data of dataSource) {
+    //         stats.engagement += Object.values(data.params).reduce(((x,y) => x+y), 0);
+    //         stats.performance += data.time_score;
+    //     }
+    //     stats.overall = 2 * stats.engagement + 3 * stats.performance;
+    //     return stats;
+    // }
 
 }
 
