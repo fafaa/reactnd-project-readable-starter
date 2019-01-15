@@ -1,26 +1,18 @@
-exports.set = function(req, res) {
+var db = require('./database.js').db;
+
+console.log('!!!!!!!!!!!!DB', db)
+exports.set = function(body) {
     // params, uuid_art, title_art, author
     return new Promise((res) => {
-        // let posts = getData(token);
-        // posts[post.id] = {
-        //     id: post.id,
-        //     timestamp: post.timestamp,
-        //     title: post.title,
-        //     body: post.body,
-        //     author: post.author,
-        //     category: post.category,
-        //     voteScore: 1,
-        //     deleted: false,
-        //     commentCount: 0
-        // }
-        res('OK');
+        let uuid = db.setEl(body);
+        res({uuid_art: uuid});
     });
 
 };
 
 exports.listGet = function(req, res) {
     return new Promise((res) => {
-        res('list')
+        res(db.getEl())
     });
 };
 

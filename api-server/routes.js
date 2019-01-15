@@ -4,6 +4,7 @@ module.exports = function(app) {
     const bodyParser = require('body-parser');
 
     app.post('/set', bodyParser.json(), (req, res) => {
+        console.log('!!!!!!!!!!!!req', req.body)
         ctrl.set(req.body)
             .then(
                 (data) => res.send(data),
@@ -29,6 +30,12 @@ module.exports = function(app) {
     });
 
     app.get('/list_art', (req, res) => {
+        //przyjmuje miesiac lub obecny miesiac jako default
+        //lista od najlepszego do najgorszego
+        //3 kolumny: zaangazowanie (suma punktow bez time score), jak performuje (timescore z paramsow),
+        // sumaryczny (mnozenie cos tam jedno i drugie)
+        //z limitem 100
+        //pod osobnym kluczem moj wynik
         ctrl.listArt().then(
             (data) => res.send(data),
             (error) => {
@@ -41,6 +48,8 @@ module.exports = function(app) {
     });
 
     app.get('/scores', (req, res) => {
+        //najlepsza trojka za seo, performance, cos trzeciego
+        //ma przyjmowac miesiac
         ctrl.scores().then(
             (data) => res.send(data),
             (error) => {
@@ -53,9 +62,9 @@ module.exports = function(app) {
     });
 
     app.get('*', function(req, res){
-        res.send({"info": "Url does not exist."}, 404);
+        res.status(404).send({"info": "Url does not exist."})
     });
     app.post('*', function(req, res){
-        res.send({"info": "Url does not exist."}, 404);
+        res.status(404).send({"info": "Url does not exist."})
     });
 };
