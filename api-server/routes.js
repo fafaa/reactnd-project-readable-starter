@@ -17,7 +17,7 @@ module.exports = function(app) {
     });
 
     app.get('/list', (req, res) => {
-        ctrl.listGet().then(
+        ctrl.listGet(req.query).then(
             (data) => res.send(data),
             (error) => {
                 console.error(error);
@@ -28,20 +28,8 @@ module.exports = function(app) {
         );
     });
 
-    app.get('/list_art/:month', (req, res) => {
-        ctrl.listArt(req.params.month).then(
-            (data) => res.send(data),
-            (error) => {
-                console.error(error);
-                res.status(500).send({
-                    error: 'There was an error.'
-                });
-            }
-        );
-    });
     app.get('/list_art', (req, res) => {
-        const month = new Date().getMonth()+1;
-        ctrl.listArt(month).then(
+        ctrl.listArt(req.query).then(
             (data) => res.send(data),
             (error) => {
                 console.error(error);
@@ -53,7 +41,7 @@ module.exports = function(app) {
     });
 
     app.get('/scores', (req, res) => {
-        ctrl.scores().then(
+        ctrl.scores(req.query).then(
             (data) => res.send(data),
             (error) => {
                 console.error(error);

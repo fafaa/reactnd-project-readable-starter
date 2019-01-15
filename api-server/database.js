@@ -1,45 +1,75 @@
 class DB {
     constructor(value) {
-        console.log('value', value.params)
         this._values = {
             [value.uuid_art]: value
         };
     }
 
-    getEl() {
-        return this.getElementsByProperty('month');
+    getEl(queryParams) {
+        let articlesPerMonth = this.getElementsByProperty('month')[queryParams.month] || [];
+        let articlesByAuthor = this.getElementsByProperty('author', Object.values(articlesPerMonth));
+        let resp = {};
+        let usersSumStats = [];
+        for (let user in articlesByAuthor) {
+            let userStats = {
+                engagement: 0,
+                performance: 0,
+                overall: 0,
+                author: user
+            }
+            for(let data of articlesByAuthor[user]) {
+                userStats.engagement += Object.values(data.params).reduce(((x,y) => x+y), 0);
+                userStats.performance += data.time_score;
+            }
+            userStats.overall = 2 * userStats.engagement + 3 * userStats.performance;
+            usersSumStats.push(userStats);
+            if(user === queryParams.user) {
+                resp.me = userStats;
+            }
+        }
+        if(!resp.me) {
+            resp.me = {
+                engagement: 0,
+                performance: 0,
+                overall: 0,
+                author: queryParams.user
+            }
+        }
+        return {
+            entries: usersSumStats.sort((a, b) => {return b.overall - a.overall}).slice(0,99),
+            me: resp.me
+        }
+
     }
 
     setEl(value) {
         let valueToBeSaved = value;
-        console.log('valueToBeSaved')
         valueToBeSaved['time_score'] = value.params.time_score;
         delete valueToBeSaved.params.time_score;
         this._values[value.uuid_art] = valueToBeSaved;
-        console.log('new value in db', this._values[value.uuid_art]);
         return value.uuid_art;
     }
 
-//przyjmuje miesiac lub obecny miesiac jako default
-//lista od najlepszego do najgorszego
-//3 kolumny: zaangazowanie (suma punktow bez time score), jak performuje (timescore z paramsow),
-// sumaryczny (mnozenie cos tam jedno i drugie)
-//z limitem 100
-//pod osobnym kluczem moj wynik
-
-    getTopEl(month) {
+    getTopEl(queryParams) {
+        const month = queryParams.month;
+        const queryUser = queryParams.user || null;
         let itemsPerMonth = this.getElementsByProperty('month')[month] || [];
         let itemsByAuthor = this.getElementsByProperty('author', Object.values(itemsPerMonth));
-        console.log('xxxxxxxxxxxxxxxx', itemsByAuthor)
         let usersSumStats = [];
         let resp = {
-            engagement: [],
-            performance: [],
-            overall: []
+            entries: {
+                engagement: [],
+                performance: [],
+                overall: []
+            },
+            me: {
+                "engagement": 0,
+                "performance": 0,
+                "overall": 0,
+                "author": queryParams.user
+            }
         };
         for (let user in itemsByAuthor) {
-            let userData = itemsByAuthor[user];
-            console.log('userData', userData)
             let userStats = {
                 engagement: 0,
                 performance: 0,
@@ -52,12 +82,32 @@ class DB {
             }
             userStats.overall = 2 * userStats.engagement + 3 * userStats.performance;
             usersSumStats.push(userStats);
+            if(user === queryUser) {
+                resp.me = userStats;
+            }
         }
-        resp.engagement = this.sortFunction(usersSumStats, 'engagement');
-        resp.performance = this.sortFunction(usersSumStats, 'performance');
-        resp.overall = this.sortFunction(usersSumStats, 'overall');
+        resp.entries.engagement = this.sortFunction(usersSumStats, 'engagement').slice(0,99);
+        resp.entries.performance = this.sortFunction(usersSumStats, 'performance').slice(0,99);
+        resp.entries.overall = this.sortFunction(usersSumStats, 'overall').slice(0,99);
         return resp;
     }
+
+    sumArt(queryParams) {
+        let itemsPerMonth = this.getElementsByProperty('month')[queryParams.month] || [];
+        let resp = {
+            entries: []
+        };
+        for (let item of itemsPerMonth) {
+            item.engagement = Object.values(item.params).reduce(((x,y) => x+y), 0);
+            item.performance = item.time_score;
+            item.overall = 2 * item.engagement + 3 * item.performance
+            resp.entries.push(item)
+        }
+
+        resp.entries = resp.entries.sort((a, b) => {return b.overall - a.overall}).slice(0,99)
+        return resp;
+    }
+
     getElementsByProperty(property, values) {
         values = values? values : Object.values(this._values);
         let resp = {};
@@ -75,6 +125,21 @@ class DB {
         return values.sort((a, b) => {return b[property] - a[property]})
             .map(i => ({ score: i[property], author: i.author}))
     }
+
+    setStats(dataSource ) {
+        //dataSource = articlesByAuthor[user]
+        let stats = {
+            engagement: 0,
+            performance: 0,
+            overall: 0
+        }
+        for(let data of articlesByAuthor[user]) {
+            stats.engagement += Object.values(data.params).reduce(((x,y) => x+y), 0);
+            stats.performance += data.time_score;
+        }
+        stats.overall = 2 * userStats.engagement + 3 * userStats.performance;
+    }
+
 }
 
 
