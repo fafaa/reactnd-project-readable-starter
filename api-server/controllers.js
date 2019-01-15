@@ -21,8 +21,13 @@ exports.listArt = function(queryParams) {
 
 exports.scores = function(queryParams) {
     return new Promise((res) => {
-        // res.writeHead(200, {"Content-Type": "application/json"});
-        // res.end(JSON.stringify({"message": "Cos tutaj wpiszemy"}));
         res(db.getTopEl(queryParams))
+    });
+};
+
+exports.setNew = function(body) {
+    return new Promise((res) => {
+        let uuid = db.setNewEl(body);
+        res({uuid_art: uuid});
     });
 };

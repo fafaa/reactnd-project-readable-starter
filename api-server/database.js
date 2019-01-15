@@ -1,8 +1,10 @@
+
 class DB {
     constructor(value) {
         this._values = {
             [value.uuid_art]: value
         };
+        this._mockedUpdate = [];
     }
 
     getEl(queryParams) {
@@ -27,6 +29,7 @@ class DB {
             if(user === queryParams.user) {
                 resp.me = userStats;
             }
+            console.log(usersSumStats);
         }
         if(!resp.me) {
             resp.me = {
@@ -47,7 +50,10 @@ class DB {
         let valueToBeSaved = value;
         valueToBeSaved['time_score'] = value.params.time_score;
         delete valueToBeSaved.params.time_score;
+        console.log('value.uuid_art', value.uuid_art);
         this._values[value.uuid_art] = valueToBeSaved;
+
+        console.log('  this._values', this._values)
         return value.uuid_art;
     }
 
@@ -92,6 +98,36 @@ class DB {
         resp.entries.overall = this.sortFunction(usersSumStats, 'overall').slice(0,99);
         return resp;
     }
+    setNewEl(value) {
+        let valueToBeSaved = value;
+        valueToBeSaved['time_score'] = value.params.time_score || 0;
+        delete valueToBeSaved.params.time_score;
+        this._mockedUpdate.push(value.uuid_art);
+        let counter = 0;
+        let updateMocks = setInterval(() => {
+            console.log('counter', counter, this._mockedUpdate)
+            for(let uuid of this._mockedUpdate) {
+                let newTimeScore = 0;
+                if(this._values[uuid].time_score < 1) {
+                    newTimeScore = Math.floor(Math.random() * (130 - 70)) + 70
+                } else {
+                    newTimeScore = this._values[uuid].time_score + 10;
+                }
+                this._values[uuid].time_score = newTimeScore;
+            }
+            console.log('NEW VALUES',  this._values)
+            if(counter > 3) {
+                this._mockedUpdate.shift();
+                clearInterval(updateMocks)
+            }
+            counter++;
+        }, 10000);
+        console.log('od kamila', value);
+        console.log('do zapisu', valueToBeSaved)
+        this._values[value.uuid_art] = valueToBeSaved;
+        return value.uuid_art;
+    }
+
 
     sumArt(queryParams) {
         let itemsPerMonth = this.getElementsByProperty('month')[queryParams.month] || [];
@@ -159,7 +195,7 @@ module.exports = {
                 context_frame: 2
             },
             "uuid_art": "067f1975-0898-5885-af59-2009d50f46f3",
-            "title_art": "test artykul",
+            "title": "test artykul",
             "author": "Justyna Paliś",
             "month": 7,
             "time_score": 240
@@ -167,6 +203,4 @@ module.exports = {
     )
 
 
-}
-
-//GRUPOWAC PO MIESIACU!!!!
+};
